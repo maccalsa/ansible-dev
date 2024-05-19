@@ -1,0 +1,5 @@
+---
+- name: Install
+  community.general.snap:
+    name: "spotify"
+  become: yes

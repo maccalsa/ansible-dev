@@ -1,0 +1,7 @@
+---
+- name: Install zip
+  ansible.builtin.package:
+    name:
+      - zip
+    state: latest
+  become: yes

@@ -1,0 +1,7 @@
+---
+- name: Install stow
+  ansible.builtin.package:
+    name:
+      - stow
+    state: latest
+  become: yes

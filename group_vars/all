@@ -1,0 +1,70 @@
+system_setup:
+  - sudo
+
+basic_setup:
+  - git
+  - bat
+  - bottom
+  - firefox
+  - github-cli
+  - ripgrep
+  - jsonnet
+  - nnn
+  - smbclient
+  - open-vm-tools
+  - twingate
+  - lazygit
+  - lsof
+  - zip
+  - unzip
+  - fzf
+  - fd
+  - curl
+      ## - git-delta
+  - thefuck
+  - eza
+  - zoxide
+  - tmux
+  - stow
+  - httpie
+  - jq
+  - dog
+  - ufw
+  - ssh
+  - pass
+
+development_tools:
+  - go
+  - nvm
+  - make
+  - rust
+  - elixir
+  - sdkman
+  - neovim
+  - dbeaver-ce
+  - jetbrains
+  - ngrok
+
+productivity_apps:
+  - chromium
+  - postman
+  - slack
+  - spotify
+  - visual-studio-code
+
+server_utilities:
+  - docker
+  - lazydocker
+  - kind
+  - minikube
+  - terraform
+  - kubectl
+  - k9s
+  - helm
+
+terminal_tools:
+  - zsh
+  - oh-my-zsh
+  - tmux
+  - oh-my-tmux
+  - kitty

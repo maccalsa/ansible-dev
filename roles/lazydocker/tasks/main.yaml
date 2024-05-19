@@ -1,0 +1,51 @@
+---
+- name: Store the original value of DIR
+  shell: echo $DIR
+  register: original_dir
+  changed_when: false
+
+- name: Set DIR to /usr/local/bin
+  set_fact:
+    env:
+      DIR: "/usr/local/bin"
+
+- name: Download checksums for lazydocker
+  ansible.builtin.get_url:
+    url: https://github.com/jesseduffield/lazydocker/releases/download/v0.21.1/checksums.txt
+    dest: /tmp/checksums.txt
+
+- name: Extract checksum for lazydocker_0.21.1_Linux_x86_64.tar.gz
+  shell: grep 'lazydocker_0.21.1_Linux_x86_64.tar.gz' /tmp/checksums.txt | awk '{print $1}'
+  register: lazydocker_checksum
+  changed_when: false
+
+- name: Download and verify lazydocker installation script for Linux (64-bit)
+  ansible.builtin.get_url:
+    url: https://github.com/jesseduffield/lazydocker/releases/download/v0.21.1/lazydocker_0.21.1_Linux_x86_64.tar.gz
+    dest: /tmp/lazydocker_0.21.1_Linux_x86_64.tar.gz
+    mode: '0755'
+    checksum: "sha256:{{ lazydocker_checksum.stdout }}"
+    
+- name: Extract the lazydocker tarball
+  ansible.builtin.unarchive:
+    src: /tmp/lazydocker_0.21.1_Linux_x86_64.tar.gz
+    dest: /tmp/
+    remote_src: yes
+
+- name: Move lazydocker binary to /usr/local/bin
+  ansible.builtin.copy:
+    src: /tmp/lazydocker
+    dest: /usr/local/bin/lazydocker
+    mode: '0755'
+  become: yes
+
+- name: Restore original DIR value or unset it if it was not set
+  shell: |
+    if [ -z "{{ original_dir.stdout }}" ]; then
+      unset DIR
+    else
+      export DIR="{{ original_dir.stdout }}"
+    fi
+  args:
+    executable: /bin/bash
+

@@ -1,0 +1,19 @@
+---
+- name: Ensure 'wheel' group can sudo without a password
+  ansible.builtin.lineinfile:
+    path: "/etc/sudoers"
+    regexp: '^%wheel ALL=\(ALL\) ALL'
+    line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+    validate: '/usr/sbin/visudo -cf %s'
+  when: ansible_os_family == "RedHat" or ansible_os_family == "Archlinux"
+  become: true
+
+- name: Ensure 'sudo' group can sudo without a password (Debian/Ubuntu)
+  ansible.builtin.lineinfile:
+    path: "/etc/sudoers"
+    regexp: '^%sudo ALL=\(ALL\) ALL'
+    line: '%sudo ALL=(ALL) NOPASSWD: ALL'
+    validate: '/usr/sbin/visudo -cf %s'
+  when: ansible_os_family == "Debian"
+  become: true
+  

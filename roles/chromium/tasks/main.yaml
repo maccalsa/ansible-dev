@@ -1,0 +1,6 @@
+---
+- name: Install
+  community.general.snap:
+    name: "chromium"
+  become: yes
+

@@ -1,0 +1,30 @@
+---
+- name: Install zoxide on Arch Linux
+  pacman:
+    name: zoxide
+    state: present
+  become: yes
+  when: ansible_os_family == 'Archlinux'
+
+- name: Enable zoxide repository and install on Fedora
+  block:
+    - name: Enable copr repository for zoxide
+      shell: dnf copr enable atim/zoxide -y
+      args:
+        creates: /etc/yum.repos.d/_copr_atim-zoxide.repo
+
+    - name: Install zoxide
+      dnf:
+        name: zoxide
+        state: present
+  become: yes
+  when: ansible_os_family == 'RedHat' and ansible_distribution == 'Fedora'
+
+- name: Install zoxide on Debian
+  block:
+    - name: Download and run zoxide install script
+      shell: curl -sS https://webinstall.dev/zoxide | bash
+      args:
+        creates: /usr/local/bin/zoxide
+  become: yes
+  when: ansible_os_family == 'Debian'

@@ -1,0 +1,7 @@
+---
+- name: Install Jsonnet
+  ansible.builtin.package:
+    name:
+      - jsonnet
+    state: latest
+  become: yes

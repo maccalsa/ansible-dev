@@ -1,0 +1,60 @@
+---
+- name: Install prerequisites
+  ansible.builtin.package:
+    name:
+      - curl
+      - jq
+      - unzip
+    state: latest
+  become: yes
+  when : ansible_os_family == "Debian" or ansible_os_family == "RedHat"
+
+- name : Fetch for Debian and Fedora
+  block:
+
+    - name: Fetch the latest version URL of dog for Linux x86_64
+      shell: curl -s "{{ dog_release_url }}" | jq -r ".assets[] | select(.name | test('dog-v.*-x86_64-unknown-linux-gnu.zip')) | .browser_download_url"
+      register: download_url
+      changed_when: false
+
+    - name: Download dog zip file
+      get_url:
+        url: "{{ download_url.stdout }}"
+        dest: "/tmp/dog.zip"
+        mode: '0755'
+
+    - name: Unarchive dog binary
+      unarchive:
+        src: "/tmp/dog.zip"
+        dest: "/tmp"
+        remote_src: yes
+        creates: "/tmp/dog/dog"
+
+    - name: Move dog binary to /usr/local/bin
+      command: mv /tmp/dog/dog /usr/local/bin/dog
+
+    - name: Set executable permissions for dog binary
+      file:
+        path: /usr/local/bin/dog
+        mode: '0755'
+        state: file
+
+    - name: Cleanup temporary files
+      file:
+        path: "/tmp/dog.zip"
+        state: absent
+
+    - name: Cleanup extracted directory
+      file:
+        path: "/tmp/dog"
+        state: absent
+  become: yes
+  when: ansible_os_family == "Debian" or ansible_os_family == "RedHat"
+    
+- name : Install for arch 
+  ansible.builtin.package:
+    name:
+      - dog
+    state: latest
+  become: yes
+  when: ansible_os_family == "Archlinux"

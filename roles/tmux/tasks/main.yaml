@@ -1,0 +1,46 @@
+---
+- name: Install
+  ansible.builtin.package:
+    name:
+      - tmux
+    state: latest
+  become: yes
+
+- name: Ensure .tmux directory exists
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/.tmux"
+    state: directory
+    owner: "{{ ansible_env.USER }}"
+    group: "{{ ansible_env.USER }}"
+    mode: '0755'
+   become: yes
+
+- name: Install TPM (Tmux Plugin Manager)
+  ansible.builtin.git:
+    repo: 'https://github.com/tmux-plugins/tpm'
+    dest: "{{ ansible_env.HOME }}/.tmux/plugins/tpm"
+    version: master
+    clone: yes
+    update: yes
+   become: yes
+
+- name: Ensure tmux config exists and source TPM
+  ansible.builtin.lineinfile:
+    path: "{{ ansible_env.HOME }}/.tmux.conf"
+    line: 'run-shell "{{ ansible_env.HOME }}/.tmux/plugins/tpm/tpm"'
+    create: yes
+    state: present
+   become: yes
+
+- name: Reload tmux environment if running
+  shell: tmux source-file "{{ ansible_env.HOME }}/.tmux.conf"
+  ignore_errors: yes
+  changed_when: false
+  become: yes
+
+   
+
+   
+
+  
+

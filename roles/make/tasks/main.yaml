@@ -1,0 +1,7 @@
+---
+- name: Install make
+  ansible.builtin.package:
+    name:
+      - make
+    state: latest
+  become: yes

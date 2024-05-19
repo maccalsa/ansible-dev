@@ -1,0 +1,7 @@
+---
+- name: Install thefuck
+  ansible.builtin.package:
+    name:
+      - thrfuck
+    state: latest
+  become: yes

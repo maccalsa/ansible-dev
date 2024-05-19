@@ -1,0 +1,55 @@
+---
+- name: Install prerequisites
+  package:
+    name:
+      - curl
+      - build-essential
+      - libssl-dev
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: Install prerequisites for Fedora
+  package:
+    name:
+      - curl
+      - "@Development Tools"
+      - openssl-devel
+    state: present
+  when: ansible_os_family == "RedHat"
+
+- name: Install prerequisites for Arch Linux
+  package:
+    name:
+      - curl
+      - base-devel
+      - openssl
+    state: present
+  when: ansible_os_family == "Archlinux"
+
+- name: Download and run the NVM install script
+  shell: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+  args:
+    creates: "{{ ansible_env.HOME }}/.nvm/nvm.sh"
+  environment:
+    PROFILE: /dev/null  # Avoids modifying bashrc/zshrc
+
+- name: Set environment variables for NVM
+  lineinfile:
+    path: "{{ item }}"
+    line: 'export NVM_DIR="$HOME/.nvm"'
+    create: yes
+  loop:
+    - "{{ ansible_env.HOME }}/.bashrc"
+    - "{{ ansible_env.HOME }}/.zshrc"
+    - "{{ ansible_env.HOME }}/.profile"
+
+- name: Source NVM in shell configurations
+  lineinfile:
+    path: "{{ item }}"
+    line: '[[ -s "$HOME/.nvm/nvm.sh" ]] && \. "$HOME/.nvm/nvm.sh"  # This loads nvm'
+    create: yes
+  loop:
+    - "{{ ansible_env.HOME }}/.bashrc"
+    - "{{ ansible_env.HOME }}/.zshrc"
+    - "{{ ansible_env.HOME }}/.profile"
+

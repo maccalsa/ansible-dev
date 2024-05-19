@@ -1,0 +1,59 @@
+---
+- name: Download and install kind
+  get_url:
+    url: "https://github.com/kubernetes-sigs/kind/releases/download/v0.11.1/kind-linux-amd64"
+    dest: "/usr/local/bin/kind"
+    mode: '0755'
+  become: yes
+
+# Create a kind cluster
+- name: Create kind cluster
+  command: kind create cluster
+  become: no
+  args:
+    creates: "~/.kube/config"
+
+# Wait for the cluster to be responsive
+- name: Wait for cluster node to be ready
+  command: kubectl wait --timeout=180s --for=condition=Ready node/kind-control-plane
+  become: no
+
+# Deploy MetalLB
+- name: Apply MetalLB manifest
+  command: kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.11.0/manifests/namespace.yaml
+  become: no
+
+- name: Apply MetalLB manifest
+  command: kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.11.0/manifests/metallb.yaml
+  become: no
+
+- name: Create secret for MetalLB
+  command: kubectl create secret generic -n metallb-system memberlist --from-literal=secretkey="$(openssl rand -base64 128)"
+  become: no
+  register: secret_created
+  failed_when: "'AlreadyExists' not in secret_created.stderr and secret_created.rc != 0"
+
+# Define an address pool for MetalLB
+# Adjust addresses according to your needs
+- name: Deploy MetalLB config
+  copy:
+    content: |
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        namespace: metallb-system
+        name: config
+      data:
+        config: |
+          address-pools:
+          - name: default
+            protocol: layer2
+            addresses:
+            - 192.168.39.100-192.168.39.200
+    dest: "/tmp/metallb-config.yaml"
+  become: no
+
+- name: Apply MetalLB config
+  command: kubectl apply -f /tmp/metallb-config.yaml
+  become: no
+

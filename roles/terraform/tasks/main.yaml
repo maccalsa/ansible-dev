@@ -1,0 +1,23 @@
+---
+- name: Check if terraform is already installed
+  command: terraform version
+  register: terraform_installed
+  failed_when: false
+  changed_when: false
+  become: yes
+
+- name: Download Terraform
+  get_url:
+    url: "https://releases.hashicorp.com/terraform/{{ terraform_version }}/terraform_{{ terraform_version }}_linux_amd64.zip"
+    dest: "/tmp/terraform_{{ terraform_version }}_linux_amd64.zip"
+    mode: '0755'
+  when: terraform_installed.rc != 0
+  become: yes
+
+- name: Unzip Terraform binary
+  unarchive:
+    src: "/tmp/terraform_{{ terraform_version }}_linux_amd64.zip"
+    dest: "/usr/local/bin/"
+    remote_src: yes
+  when: terraform_installed.rc != 0
+  become: yes

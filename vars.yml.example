@@ -1,0 +1,5 @@
+## the user to elivate to sudoer
+sudo_user: exampleuser
+
+git_user_name: exampleuser
+git_user_email: exampleuser@exampleuser.com

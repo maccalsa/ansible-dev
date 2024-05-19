@@ -1,0 +1,7 @@
+---
+- name: Install lsof
+  ansible.builtin.package:
+    name:
+      - lsof
+    state: latest
+  become: yes

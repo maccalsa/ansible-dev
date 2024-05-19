@@ -1,0 +1,20 @@
+---
+- name: Check if sdkman is installed
+  stat: 
+    path: "{{ ansible_env.HOME }}/.sdkman/bin/sdkman-init.sh"
+  register: sdkman_installed
+
+- name: Download and install sdkman
+  shell: curl -s "https://get.sdkman.io" | bash
+  args:
+    creates: "{{ ansible_env.HOME }}/.sdkman/bin/sdkman-init.sh"
+  when: not sdkman_installed.stat.exists
+
+- name: Add sdkman to bashrc
+  lineinfile:
+    path: "{{ ansible_env.HOME }}/.bashrc"
+    line: '[[ -s "{{ ansible_env.HOME }}/.sdkman/bin/sdkman-init.sh" ]] && source "{{ ansible_env.HOME }}/.sdkman/bin/sdkman-init.sh"'
+    state: present
+  when: not sdkman_installed.stat.exists
+
+

@@ -1,0 +1,14 @@
+---
+- name: Ensure curl is installed
+  apt:
+    name: curl
+    state: present
+  become: yes
+
+# Download and run the Twingate installation script
+- name: Install Twingate
+  shell: curl -fsSL https://binaries.twingate.com/client/linux/install.sh | bash
+  args:
+    warn: no # To suppress warnings about using shell with pipes
+  become: yes
+

@@ -1,0 +1,56 @@
+---
+- name: Install lazygit on Arch Linux
+  ansible.builtin.pacman:
+    name: lazygit
+    state: present
+  when: ansible_distribution == "Archlinux"
+  become: yes
+
+- name: Install lazygit on Fedora
+  block:
+    - name: Enable Copr repository for lazygit
+      ansible.builtin.dnf:
+        name: copr:copr.fedorainfracloud.org:atim:lazygit
+        state: present
+
+    - name: Install lazygit using dnf
+      ansible.builtin.dnf:
+        name: lazygit
+        state: present
+  when: ansible_distribution == "Fedora"
+  become: yes
+
+- name: Install lazygit on Ubuntu
+  block:
+    - name: Fetch the latest release tag for lazygit
+      uri:
+        url: https://api.github.com/repos/jesseduffield/lazygit/releases/latest
+        return_content: yes
+      register: github_release
+      changed_when: false
+
+    - name: Extract version from the GitHub response
+      set_fact:
+        lazygit_version: "{{ github_release.json.tag_name[1:] }}"
+
+    - name: Download the lazygit tarball for the latest version
+      ansible.builtin.get_url:
+        url: "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_{{ lazygit_version }}_Linux_x86_64.tar.gz"
+        dest: "/tmp/lazygit.tar.gz"
+        mode: '0755'
+
+    - name: Extract the lazygit binary
+      ansible.builtin.unarchive:
+        src: "/tmp/lazygit.tar.gz"
+        dest: "/tmp"
+        remote_src: yes
+
+    - name: Install lazygit to /usr/local/bin
+      ansible.builtin.copy:
+        src: "/tmp/lazygit"
+        dest: "/usr/local/bin/lazygit"
+        mode: '0755'
+        remote_src: yes
+  become: yes
+  when: ansible_distribution == "Ubuntu"
+

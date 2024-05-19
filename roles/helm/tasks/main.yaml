@@ -1,0 +1,19 @@
+---
+- name: Ensure snapd is installed
+  ansible.builtin.package:
+    name: snapd
+    state: present
+  become: yes
+
+- name: Wait for snapd.socket to ensure Snap daemon is running
+  ansible.builtin.systemd:
+    name: snapd.socket
+    state: started
+  become: yes
+
+- name: Install Helm via Snap (with --classic option)
+  command:
+    cmd: snap install helm --classic
+    creates: /snap/bin/helm
+  become: yes
+

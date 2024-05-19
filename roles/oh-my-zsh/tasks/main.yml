@@ -1,0 +1,48 @@
+---   
+- name: Install Oh My Zsh
+  shell: |
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+  args:
+    creates: ~/.oh-my-zsh
+  become: no
+
+- name: Clone zsh-autosuggestions
+  git:
+    repo: https://github.com/zsh-users/zsh-autosuggestions
+    dest: "{{ ansible_user_dir }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
+  become: no
+
+- name: Clone zsh-syntax-highlighting
+  git:
+    repo: https://github.com/zsh-users/zsh-syntax-highlighting.git
+    dest: "{{ ansible_user_dir }}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
+  become: no
+
+- name: Update .zshrc for new plugins
+  lineinfile:
+    path: "{{ ansible_user_dir }}/.zshrc"
+    regexp: '^plugins=\((.*)\)$'
+    line: 'plugins=(git zsh-autosuggestions zsh-syntax-highlighting sudo web-search copypath copyfile)'
+  become: no
+
+- name: Install Powerlevel10k theme for Oh My Zsh
+  git:
+    repo: 'https://github.com/romkatv/powerlevel10k.git'
+    dest: "{{ ansible_user_dir }}/.oh-my-zsh/custom/themes/powerlevel10k"
+  become: no
+
+- name: Configure zshrc for Powerlevel10k
+  lineinfile:
+    path: "{{ ansible_user_dir }}/.zshrc"
+    regexp: '^ZSH_THEME='
+    line: 'ZSH_THEME="powerlevel10k/powerlevel10k"'
+  become: no
+
+- name: Set zsh as the default shell for the current user
+  user:
+    name: "{{ ansible_env.USER }}"  # This dynamically gets the current user's username
+    shell: /usr/bin/zsh  # Ensure zsh is installed at this location; adjust if necessary
+
+- name: Debug message
+  debug:
+    msg: "Remeber to set the nerd font!!, To start the p10k configuration, run the 'zsh' command."

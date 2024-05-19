@@ -1,0 +1,26 @@
+---
+- name: Install curl
+  package:
+    name: curl
+    state: present
+  when: ansible_os_family in ['Debian', 'RedHat', 'Archlinux']
+
+- name: Install Rust with rustup
+  shell: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+  args:
+    creates: "{{ ansible_env.HOME }}/.cargo/bin/rustc"
+  environment:
+    HOME: "{{ ansible_env.HOME }}"
+
+- name: Set environment variables for Rust
+  lineinfile:
+    path: "{{ ansible_env.HOME }}/.profile"
+    line: 'export PATH="$HOME/.cargo/bin:$PATH"'
+    create: yes
+  when: ansible_os_family in ['Debian', 'RedHat', 'Archlinux']
+
+- name: Ensure Rust environment is sourced
+  shell: source "{{ ansible_env.HOME }}/.profile"
+  args:
+    executable: /bin/bash
+  when: ansible_os_family in ['Debian', 'RedHat', 'Archlinux']

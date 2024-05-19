@@ -1,0 +1,23 @@
+---
+- name: Install ufw
+  ansible.builtin.package:
+    name:
+      - ufw
+    state: latest
+  become: yes
+
+- name: Allow configured ports
+  ansible.builtin.ufw:
+    rule: allow
+    port: "{{ item }}"
+    proto: tcp
+  loop: "{{ ufw_allowed_ports }}"
+  become: yes
+
+- name: Enable ufw
+  ansible.builtin.ufw:
+    state: enabled
+    policy: deny
+    direction: incoming
+  become: yes
+  

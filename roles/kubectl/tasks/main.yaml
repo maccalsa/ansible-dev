@@ -1,0 +1,21 @@
+---
+- name: Check if kubectl is already installed
+  command: kubectl version --client=true
+  register: kubectl_installed
+  failed_when: false
+  changed_when: false
+  become: yes
+
+- name: Fetch kubectl stable version
+  command: "curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt"
+  register: kubectl_version
+  changed_when: false
+  when: kubectl_installed.rc != 0
+
+- name: Download kubectl
+  get_url:
+    url: "https://storage.googleapis.com/kubernetes-release/release/{{ kubectl_version.stdout }}/bin/linux/amd64/kubectl"
+    dest: "/usr/local/bin/kubectl"
+    mode: '0755'
+  when: kubectl_installed.rc != 0
+  become: yes

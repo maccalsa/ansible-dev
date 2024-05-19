@@ -1,0 +1,46 @@
+---
+- name: Install bottom on Arch Linux
+  ansible.builtin.pacman:
+    name: bottom
+    state: present
+  become: yes
+  when: ansible_distribution == "Archlinux"
+
+- name: Install bottom on Debian (x86-64)
+  block:
+    - ansible.builtin.get_url:
+        url: https://github.com/ClementTsang/bottom/releases/download/0.9.6/bottom_0.9.6_amd64.deb
+        dest: "/tmp/bottom_0.9.6_amd64.deb"
+    - ansible.builtin.shell:
+        cmd: dpkg -i /tmp/bottom_0.9.6_amd64.deb
+  become: yes
+  when: ansible_distribution == "Debian" and ansible_architecture == "x86_64"
+
+- name: Install bottom on Debian (ARM64)
+  block:
+    - ansible.builtin.get_url:
+        url: https://github.com/ClementTsang/bottom/releases/download/0.9.6/bottom_0.9.6_arm64.deb
+        dest: "/tmp/bottom_0.9.6_arm64.deb"
+    - ansible.builtin.shell:
+        cmd: dpkg -i /tmp/bottom_0.9.6_arm64.deb
+  when: ansible_distribution == "Debian" and ansible_architecture == "aarch64"
+
+- name: Install bottom on Debian (ARM)
+  block:
+    - ansible.builtin.get_url:
+        url: https://github.com/ClementTsang/bottom/releases/download/0.9.6/bottom_0.9.6_armhf.deb
+        dest: "/tmp/bottom_0.9.6_armhf.deb"
+    - ansible.builtin.shell:
+        cmd: dpkg -i /tmp/bottom_0.9.6_armhf.deb
+  become: yes
+  when: ansible_distribution == "Debian" and ansible_architecture == "armv7l"
+
+- name: Install bottom on Fedora
+  block:
+    - ansible.builtin.shell:
+        cmd: dnf copr enable atim/bottom -y
+    - ansible.builtin.dnf:
+        name: bottom
+        state: present
+  become: yes
+  when: ansible_distribution == "Fedora"

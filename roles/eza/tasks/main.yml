@@ -1,0 +1,59 @@
+---
+- name: Install eza on Debian-based systems
+  block:
+    - name: Update apt and install gpg
+      apt:
+        name: gpg
+        update_cache: yes
+        state: present
+
+    - name: Create /etc/apt/keyrings directory
+      file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: '0755'
+
+    - name: Download and install GPG key
+      get_url:
+        url: https://raw.githubusercontent.com/eza-community/eza/main/deb.asc
+        dest: /tmp/deb.asc
+
+    - name: Import GPG key
+      shell: gpg --dearmor -o /etc/apt/keyrings/gierens.gpg < /tmp/deb.asc
+      args:
+        creates: /etc/apt/keyrings/gierens.gpg
+
+    - name: Add eza repository
+      copy:
+        content: "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main"
+        dest: /etc/apt/sources.list.d/gierens.list
+
+    - name: Set permissions for the GPG key and list file
+      file:
+        path: "{{ item }}"
+        mode: '0644'
+      with_items:
+        - /etc/apt/keyrings/gierens.gpg
+        - /etc/apt/sources.list.d/gierens.list
+
+    - name: Update apt cache and install eza
+      apt:
+        name: eza
+        update_cache: yes
+        state: present
+  become: yes
+  when: ansible_os_family == 'Debian'
+
+- name: Install eza on Arch Linux
+  pacman:
+    name: eza
+    state: present
+  become: yes
+  when: ansible_os_family == 'Archlinux'
+
+- name: Install eza on Fedora
+  dnf:
+    name: eza
+    state: present
+  become: yes
+  when: ansible_os_family == 'RedHat' and ansible_distribution == 'Fedora'

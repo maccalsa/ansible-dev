@@ -1,0 +1,48 @@
+---
+- name: Download k9s tarball
+  ansible.builtin.get_url:
+    url: https://github.com/derailed/k9s/releases/download/v0.27.4/k9s_Linux_amd64.tar.gz
+    dest: /tmp/k9s_Linux_amd64.tar.gz
+    mode: '0755'
+
+- name: Extract k9s tarball
+  ansible.builtin.unarchive:
+    src: /tmp/k9s_Linux_amd64.tar.gz
+    dest: /tmp
+    remote_src: yes
+
+- name: Move k9s binary to /usr/local/bin
+  ansible.builtin.command:
+    cmd: mv /tmp/k9s /usr/local/bin/k9s
+  become: yes
+
+- name: Set permissions for k9s binary
+  ansible.builtin.file:
+    path: /usr/local/bin/k9s
+    mode: '0755'
+  become: yes
+
+- name: Create directory for dog archive extraction
+  ansible.builtin.file:
+    path: /opt/k9s
+    state: directory
+  become: yes
+
+# Optional: You can extract and place the README.md if desired.
+- name: Move k9s README.md to /opt/k9s
+  ansible.builtin.command:
+    cmd: mv /tmp/README.md /opt/k9s/
+  become: yes
+
+- name: Directory
+  ansible.builtin.file:
+    mode: "0755"
+    path: "{{ ansible_user_dir }}/.config/k9s"
+    state: directory
+
+- name: skin.yml
+  ansible.builtin.copy:
+    dest: "{{ ansible_user_dir }}/.config/k9s/skin.yml"
+    src: "skin.yml"
+
+    

@@ -1,0 +1,36 @@
+---
+- name: Add GitHub CLI repository for Debian-based systems
+  ansible.builtin.apt_repository:
+    repo: ppa:cli/github
+    state: present
+  become: yes
+  when: ansible_os_family == "Debian"
+
+- name: Update repositories and install GitHub CLI on Debian-based systems
+  ansible.builtin.apt:
+    update_cache: yes
+    name: gh
+    state: present
+  become: yes
+  when: ansible_os_family == "Debian"
+
+- name: Install GitHub CLI on Fedora
+  block:
+    - name: Add GitHub CLI repository for Fedora
+      ansible.builtin.dnf:
+        name: 'https://cli.github.com/packages/rpm/gh-cli.repo'
+        state: present
+
+    - name: Install gh
+      ansible.builtin.dnf:
+        name: gh
+        state: present
+  become: yes
+  when: ansible_os_family == "RedHat" and ansible_distribution == "Fedora"
+
+- name: Install GitHub CLI on Arch Linux
+  ansible.builtin.pacman:
+    name: github-cli
+    state: present
+  become: yes
+  when: ansible_os_family == "Archlinux"
